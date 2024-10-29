@@ -1,0 +1,22 @@
+{
+    "name": "ToolkitEditor.XP.VisualScripting",
+    "rootNamespace": "",
+    "references": [
+        "GUID:54cb1906aeb4e4264bc1d2aa3818a43f",
+        "GUID:23f3c6063e13e4fd9addce3606ff4e42",
+        "GUID:43c99bbf3f4fe024284b7dac2138e78a",
+        "GUID:21907b900bc57844da38ade1121897c3",
+        "GUID:3f1f571dedb44f84b9692faef46a67d8"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

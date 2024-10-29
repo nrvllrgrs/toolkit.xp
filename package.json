@@ -1,0 +1,23 @@
+{
+  "name": "com.toolkit.xp",
+  "displayName": "XP Toolkit",
+  "version": "1.0.0",
+  "unity": "2019.4",
+  "description": "A set data structures to define and manage player progression.",
+  "keywords": [
+    "toolkit"
+  ],
+  "category": "Toolkit",
+  "dependencies": {},
+  "repository": {
+    "url": "https://github.com/nrvllrgrs/toolkit.xp",
+    "type": "git"
+  },
+  "samples": [
+    {
+      "displayName": "Visual Scripting",
+      "description": "Visual Scripting components",
+      "path": "Samples~/Visual Scripting"
+    }
+  ],
+}
