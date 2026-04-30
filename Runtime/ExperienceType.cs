@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using ToolkitEngine.Inventory;
 
 namespace ToolkitEngine.XP
 {
@@ -19,7 +20,7 @@ namespace ToolkitEngine.XP
 		private string m_description;
 
 		[SerializeField]
-		private List<int> m_levels = new();
+		private List<Level> m_levels = new();
 
 		#endregion
 
@@ -29,8 +30,8 @@ namespace ToolkitEngine.XP
 		public new string name => m_name;
 		public string description => m_description;
 		public int maxLevel => m_levels.Count + 1;
-		public int maxValue => m_levels[^1];
-		public IList<int> levels => m_levels;
+		public int maxValue => m_levels[^1].maxValue;
+		public IList<Level> levels => m_levels;
 
 		#endregion
 
@@ -40,13 +41,34 @@ namespace ToolkitEngine.XP
 		{
 			if (0 < level && level <= m_levels.Count)
 			{
-				value = m_levels[level - 1];
+				value = m_levels[level - 1].maxValue;
 				return true;
 			}
 
 			value = 0;
 			return false;
 		}
+
+		#endregion
+	}
+
+	[System.Serializable]
+	public class Level
+	{
+		#region Fields
+
+		[SerializeField]
+		private int m_maxValue;
+
+		[SerializeField]
+		private List<DropEntry> m_rewards = new();
+
+		#endregion
+
+		#region Properties
+
+		public int maxValue => m_maxValue;
+		public DropEntry[] rewards => m_rewards.ToArray();
 
 		#endregion
 	}

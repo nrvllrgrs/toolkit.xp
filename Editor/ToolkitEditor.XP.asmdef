@@ -2,7 +2,9 @@
     "name": "ToolkitEditor.XP",
     "rootNamespace": "",
     "references": [
+        "GUID:0b2b191acd5ecdb4da1dd2e73cbe1d45",
         "GUID:43c99bbf3f4fe024284b7dac2138e78a",
+        "GUID:b1b76fcec1f18ad4ebeece865cb4b15b",
         "GUID:4f6675837be5f1d45a32fb1920bd0217"
     ],
     "includePlatforms": [

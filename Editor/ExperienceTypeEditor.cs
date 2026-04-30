@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Linq;
 using UnityEngine;
 using UnityEditor;
@@ -22,6 +23,9 @@ namespace ToolkitEditor.XP
 		private float m_maxValue = int.MinValue;
 		private float m_viewWidth = 1f;
 
+		private const string MAX_WIDTH_NAME = "m_maxValue";
+		private const string REWARDS_NAME = "m_rewards";
+
 		#endregion
 
 		#region Methods
@@ -42,7 +46,7 @@ namespace ToolkitEditor.XP
 		{
 			if (m_levelsList == null)
 			{
-				m_levelsList = new ReorderableList(m_experienceType.levels.ToArray(), typeof(int), true, true, true, true);
+				m_levelsList = new ReorderableList((IList)m_experienceType.levels, typeof(Level), true, true, true, true);
 				m_levelsList.drawHeaderCallback += (Rect rect) =>
 				{
 					EditorGUI.LabelField(rect, "Levels");
@@ -69,6 +73,15 @@ namespace ToolkitEditor.XP
 				UpdateMaxValue();
 			}
 
+			if (m_levelsList.index.Between(0, m_levelsList.count))
+			{
+				EditorGUILayout.PropertyField(
+					GetPropertyAt(m_levelsList.index, REWARDS_NAME),
+					new GUIContent($"Level {m_levelsList.index + 1} Rewards"));
+			}
+
+			EditorGUILayout.Separator();
+
 			EditorGUILayout.LabelField("Progress");
 
 			// Create space between layout properties and bar graph
@@ -92,7 +105,7 @@ namespace ToolkitEditor.XP
 				float heightOffset = size.y + size.width;
 				for (int i = 0; i < m_levels.arraySize; ++i)
 				{
-					float value = m_levels.GetArrayElementAtIndex(i).intValue / m_maxValue;
+					float value = GetPropertyAt(i, MAX_WIDTH_NAME).intValue / m_maxValue;
 
 					// Draw vertical bar
 					var pivot = new Vector2(size.x + (barHeight + 2) * i, heightOffset);
@@ -110,7 +123,9 @@ namespace ToolkitEditor.XP
 			m_maxValue = int.MinValue;
 			for (int i = 0; i < m_levels.arraySize; ++i)
 			{
-				m_maxValue = Mathf.Max(m_levels.GetArrayElementAtIndex(i).intValue, m_maxValue);
+				m_maxValue = Mathf.Max(
+					(m_levels.GetArrayElementAtIndex(i).boxedValue as Level).maxValue,
+					m_maxValue);
 			}
 		}
 
@@ -118,12 +133,17 @@ namespace ToolkitEditor.XP
 
 		#region ReorderableList Methods
 
+		private SerializedProperty GetPropertyAt(int index, string relativePropertyPath)
+		{
+			return m_levels.GetArrayElementAtIndex(index).FindPropertyRelative(relativePropertyPath);
+		}
+
 		private void OnDrawElementCallback(Rect rect, int index, bool isActive, bool isFocused)
 		{
-			var levelProp = m_levels.GetArrayElementAtIndex(index);
-			int levelValue = levelProp.intValue;
+			var levelProp = GetPropertyAt(index, MAX_WIDTH_NAME);
+			var levelValue = levelProp.intValue;
 			int prevLevelValue = index > 0
-				? m_levels.GetArrayElementAtIndex(index - 1).intValue
+				? GetPropertyAt(index - 1, MAX_WIDTH_NAME).intValue
 				: 0;
 
 			Rect position = new Rect(rect);
@@ -152,8 +172,7 @@ namespace ToolkitEditor.XP
 
 		private void OnAddDropdownCallback(Rect buttonRect, ReorderableList list)
 		{
-			m_experienceType.levels.Add(0);
-			m_levelsList.list = m_experienceType.levels.ToArray();
+			m_experienceType.levels.Add(new Level());
 			UpdateMaxValue();
 		}
 
@@ -166,7 +185,6 @@ namespace ToolkitEditor.XP
 		{
 			// Remove faction from list
 			m_experienceType.levels.RemoveAt(list.index);
-			list.list = m_experienceType.levels.ToArray();
 			UpdateMaxValue();
 		}
 

@@ -27,6 +27,9 @@ namespace ToolkitEngine.XP
 
 		public ExperienceType experience { get; private set; }
 
+		/// <summary>
+		/// Gets or sets the current level. Setting this value updates the min/max experience range and raises the LevelChanged event.
+		/// </summary>
 		public int level
 		{
 			get => m_level;
@@ -45,8 +48,14 @@ namespace ToolkitEngine.XP
 			}
 		}
 
+		/// <summary>
+		/// Gets the maximum level defined in the ExperienceType configuration.
+		/// </summary>
 		public int maxLevel => experience.maxLevel;
 
+		/// <summary>
+		/// Gets or sets the total experience value. Setting this value automatically levels up if the next level threshold is reached and raises the ValueChanged event.
+		/// </summary>
 		public int value
 		{
 			get => m_value;
@@ -57,15 +66,19 @@ namespace ToolkitEngine.XP
 					return;
 
 				m_value = value;
-				ValueChanged?.Invoke(this, new ExperienceEventArgs(experience));
-
-				if (value > nextLevelValue)
+				if (value >= nextLevelValue)
 				{
 					++level;
 				}
+
+				// Invoke value changed after updating level (which updates min-max range)
+				ValueChanged?.Invoke(this, new ExperienceEventArgs(experience));
 			}
 		}
 
+		/// <summary>
+		/// Gets the total experience value required to reach the next level. Returns -1 if already at max level.
+		/// </summary>
 		public int nextLevelValue
 		{
 			get
@@ -77,6 +90,9 @@ namespace ToolkitEngine.XP
 			}
 		}
 
+		/// <summary>
+		/// Gets the normalized progress toward the next level as a value between 0 and 1. Returns 1 if at max level.
+		/// </summary>
 		public float normalizedLevelValue
 		{
 			get
@@ -88,7 +104,14 @@ namespace ToolkitEngine.XP
 			}
 		}
 
+		/// <summary>
+		/// Gets the experience gained in the current level.
+		/// </summary>
 		public int levelValue => m_value - m_minValue;
+
+		/// <summary>
+		/// Gets the remaining experience needed to reach the next level.
+		/// </summary>
 		public int remainingLevelValue => m_maxValue - m_value;
 
 		#endregion
@@ -106,6 +129,9 @@ namespace ToolkitEngine.XP
 
 		#region Methods
 
+		/// <summary>
+		/// Updates the minimum and maximum experience values based on the current level.
+		/// </summary>
 		private void UpdateMinMax()
 		{
 			if (m_level == 1 || !experience.TryGetRequiredValue(m_level - 1, out m_minValue))

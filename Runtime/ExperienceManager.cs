@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using ToolkitEngine.Inventory;
 
 namespace ToolkitEngine.XP
 {
@@ -31,8 +32,8 @@ namespace ToolkitEngine.XP
 
 		#region Events
 
-		public event EventHandler<ExperienceEventArgs> ValueChanged;
-		public event EventHandler<ExperienceEventArgs> LevelChanged;
+		public static event Action<ExperienceEventArgs> ValueChanged;
+		public static event Action<ExperienceEventArgs> LevelChanged;
 
 		#endregion
 
@@ -61,37 +62,40 @@ namespace ToolkitEngine.XP
 			m_runtimeMap = null;
 		}
 
-		public bool TryGetRuntimeExperince(ExperienceType xp, out RuntimeExperienceType runtimeXp)
+		public static bool TryGetRuntimeExperince(ExperienceType xp, out RuntimeExperienceType runtimeXp)
 		{
-			return m_runtimeMap.TryGetValue(xp, out runtimeXp);
+			return CastInstance.m_runtimeMap.TryGetValue(xp, out runtimeXp);
 		}
 
-		public int GetValue(ExperienceType xp)
+		public static int GetValue(ExperienceType xp)
 		{
-			return m_runtimeMap.TryGetValue(xp, out var runtimeXp)
+			if (!Exists)
+				return -1;
+
+			return CastInstance.m_runtimeMap.TryGetValue(xp, out var runtimeXp)
 				? runtimeXp.value
 				: -1;
 		}
 
-		public void SetValue(ExperienceType xp, int value)
+		public static void SetValue(ExperienceType xp, int value)
 		{
-			if (!m_runtimeMap.TryGetValue(xp, out var runtimeXp))
+			if (!CastInstance.m_runtimeMap.TryGetValue(xp, out var runtimeXp))
 				return;
 
 			runtimeXp.value = value;
 		}
 
-		public void ModifyValue(ExperienceType xp, int delta)
+		public static void ModifyValue(ExperienceType xp, int delta)
 		{
-			if (!m_runtimeMap.TryGetValue(xp, out var runtimeXp))
+			if (!CastInstance.m_runtimeMap.TryGetValue(xp, out var runtimeXp))
 				return;
 
 			runtimeXp.value += delta;
 		}
 
-		public int GetLevel(ExperienceType xp)
+		public static int GetLevel(ExperienceType xp)
 		{
-			return m_runtimeMap.TryGetValue(xp, out var runtimeXp)
+			return CastInstance.m_runtimeMap.TryGetValue(xp, out var runtimeXp)
 				? runtimeXp.level
 				: -1;
 		}
@@ -102,12 +106,25 @@ namespace ToolkitEngine.XP
 
 		private void RuntimeXp_ValueChanged(object sender, ExperienceEventArgs e)
 		{
-			ValueChanged?.Invoke(null, e);
+			ValueChanged?.Invoke(e);
 		}
 
 		private void RuntimeXp_LevelChanged(object sender, ExperienceEventArgs e)
 		{
-			LevelChanged?.Invoke(null, e);
+			if (m_runtimeMap.TryGetValue(e.experienceType, out var runtimeXp))
+			{
+				foreach (var drop in e.experienceType.levels[runtimeXp.level - 1].rewards)
+				{
+					switch (drop.dropType)
+					{
+						case DropEntry.DropType.Currency:
+							// Keep in mind this will only work if already managed
+							InventoryManager.ModifyAmount(drop.currencyType, drop.amount);
+							break;
+					}
+				}
+			}
+			LevelChanged?.Invoke(e);
 		}
 
 		#endregion
