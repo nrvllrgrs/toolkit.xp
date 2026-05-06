@@ -16,6 +16,7 @@ namespace ToolkitEngine.XP
 
 		#region Properties
 
+		public ExperienceType xpType => m_xpType;
 		public int amount { get => m_amount; set => m_amount = value; }
 
 		#endregion
